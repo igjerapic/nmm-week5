@@ -1,0 +1,70 @@
+dimension   3
+units           metal
+atom_style      full
+boundary        p p p
+#--------------Read Atoms-----------------------------------
+read_data c60_pair_wo_bonds.data
+mass * 12.0
+group           c60a id <= 60
+group           c60b id > 60
+displace_atoms c60b move 10 0 0 units box
+#--------------Define Interatomic Potential-------------------
+neighbor            0.5 bin
+neigh_modify        delay 5 every 1
+
+pair_style          airebo 10 1 0
+pair_coeff          * * CH.airebo C
+
+compute 3 all pe/atom
+compute 4 all stress/atom NULL pair
+compute comA c60a com
+compute comB c60b com
+fix 3 c60a momentum 1 linear 1 1 1 
+fix 4 c60b momentum 1 linear 1 1 1 
+#---------Run the simulation for thermal equilibration--------
+
+thermo 1000
+velocity all create 300.0 4928459
+fix 2 all nvt temp 300.0 300.0 100.0
+timestep            0.0005
+run 10000
+reset_timestep 0
+thermo_style custom step time temp press pe ke etotal lx 
+thermo_modify   line yaml format none
+dump 1 all custom 100 traj.dat id x y z vx vy vz c_3 c_4[1] c_4[2] c_4[3]
+run 10000
+write_data      equil.data
+undump 1
+reset_timestep 0
+
+# Fix the com of the two groups
+# Deform at larger steps, effectively the potential is zero 
+
+label           loop
+variable        loop_count equal 20
+variable        a loop ${loop_count}
+
+variable        large_shift equal 0.3     # moves the fullerene molecules towards each other by 2*shift
+displace_atoms  c60a move ${large_shift} 0 0 units box 
+displace_atoms  c60b move -${large_shift} 0 0 units box 
+
+dump            2 all custom 500 lmp_data/dump.data${a} id type xu yu zu fx fy fz
+dump_modify     2 sort id
+run 5000
+undump 2
+next            a
+jump            SELF loop
+
+# Deform at much smaller steps
+label           loop2
+variable        b loop 20
+variable        b_tag   equal ${loop_count}+1*${b}
+variable        small_shift equal 0.1     
+displace_atoms  c60a move ${small_shift} 0 0 units box
+displace_atoms  c60b move -${small_shift} 0 0 units box
+dump            3 all custom 500 lmp_data/dump.data${b_tag} id type xu yu zu vx vy vz fx fy fz
+dump_modify     3 sort id
+run 5000
+undump 3
+next            b
+jump            SELF loop2

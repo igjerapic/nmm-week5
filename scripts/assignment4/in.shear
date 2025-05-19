@@ -1,0 +1,75 @@
+# Apply shear to bottlebrush melt
+###################################################
+units lj
+atom_style full
+pair_style    lj/cut 2.5
+dimension 3
+boundary p p p
+neighbor 0.8 bin
+
+read_restart       final.bin  # obtained at the end of melt creation
+change_box     all triclinic
+
+
+####################################################
+variable	Temp equal 1.0
+variable	dt_integration equal 0.005
+timestep	${dt_integration}
+neighbor	0.3 bin
+neigh_modify delay 0 every 20 check no
+variable	Tdamping equal 100*${dt_integration}
+
+variable	shearRate equal 1.0
+variable 	maxStrain equal 100
+
+
+variable	steps equal ${maxStrain}/(${shearRate}*${dt_integration})
+variable	thermo_step equal ${steps}*0.001
+variable	bin_step equal ${steps}*0.1
+variable	dump_step equal ${steps}*0.01
+
+####################################################
+
+compute         myTemp all temp/deform
+compute         myPress all pressure myTemp
+
+fix shear1 all deform 1 xy erate ${shearRate} remap v
+fix nvt1 all nvt/sllod temp ${Temp} ${Temp} ${Tdamping}
+
+
+compute     stressA all stress/atom NULL
+compute     s4 all reduce sum c_stressA[4]
+
+
+####################################################
+
+thermo ${thermo_step}
+thermo_style custom step c_myTemp temp c_myPress press pe etotal vol enthalpy c_s4 
+thermo_modify line yaml
+
+restart ${bin_step} lmp_bin/Conf_*.bin
+
+dump mydump all custom ${dump_step} lmp_data/Conf_*.dat id type xu yu zu vx vy vz
+dump_modify mydump sort id
+
+reset_timestep 0
+run ${steps}
+
+write_data startSteady.data
+write_restart startSteady.bin 
+
+undump mydump
+reset_timestep 0
+
+# Steady state calculations
+
+thermo 1000
+thermo_style custom step c_myTemp temp c_myPress press pe etotal epair vol enthalpy c_s4
+thermo_modify line yaml
+
+variable step equal logfreq(1,9,10)
+dump mydumpSteady all custom 1 lmp_data/ConfSteady.dat id type xu yu zu vx vy vz
+dump_modify mydumpSteady every v_step first yes
+dump_modify mydumpSteady sort id
+
+run 1000000
