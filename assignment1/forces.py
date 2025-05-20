@@ -13,7 +13,6 @@ def main():
     # Define the topology and trajectory files
     topology = 'c60_pair_with_bonds.data'
 
-    trajectory = 'lmp_data/dump.data*'
     traj_dir = "lmp_data"
     traj_files = sorted(glob.glob(os.path.join(traj_dir, "dump.data*")))
 
@@ -46,38 +45,23 @@ def main():
     c60b_force = np.sum(c60b_forces, axis=1)
 
     # COM of molecules and connecting vector
-    c60a_COM = np.sum(c60a_positions, axis=1)
+    c60a_COM = np.sum(c60a_positions, axis=1) # allowed as all atoms have same mass
     c60b_COM = np.sum(c60b_positions, axis=1)
 
     vect_connect = c60a_COM - c60b_COM
 
     # projection of forces on molecule a onto connection of COMs
     distances = np.einsum('ij,ij->i', vect_connect, vect_connect)
-    force_project = np.einsum('ij,ij->i', vect_connect, c60a_COM ) /distances
+    force_project = np.einsum('ij,ij->i', vect_connect, c60a_COM ) / distances
     
     
-    # binning force on c60a over distances
-    
-    
-    print(np.shape(force_project))
-    print(np.shape(distances))
-    print(c60a_COM[0] - c60b_COM[0])
-    print(np.dot(vect_connect[0], vect_connect[0]))
-    print(distances[0])
-    
-    # determining COM of each molecule per frame 
-    # c60a_COM = 
+    #TODO binning force on c60a over distances 
 
 
-    # # Now use bsa to calculate the hydrodynamics radius
-    # rhydro = np.zeros(N_FRAMES)
-    # for i, frame in enumerate(positions):
-    #     rhydro[i] = bsa.calculate_hydrodynamic_radius(frame)
-    # # you can save the time average with np.mean(rhydro)
+    #TODO fitting with either moors or LJ potential
 
-    # # Now let's compute a dynamical property: mean squared displacement
-    # msd = bsa.compute_msd(positions)
-    # # you can plot this as a function of time array using your favourite plotting package
+
+    #TODO in.fullerene_CG
 
 if __name__ == '__main__':
     main()
