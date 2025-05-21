@@ -6,21 +6,26 @@ from patch import patch
 
 # Choose a relatively large lattice size keeping the runtime in mind
 L = random.randint(20, 60)       # lattice size
-
+L = 32
 # Total number of particles
 total_particles = L * L
 
 # Split the total_particles into two species Nx and Ny
-Nx = random.randint(1, total_particles - 1)
+Nx = total_particles / 2 
 Ny = total_particles - Nx
 
 # Random patch counts per particle type
-x = random.randint(3, 10)       # x equidistant patches
-y = random.randint(3, 10)       # y equidistant patches
+# x = random.randint(3, 10)       # x equidistant patches
+# y = random.randint(3, 10)       # y equidistant patches
+x = 2
+y = 2
+
+
 
 # Avoid large packing fractions, otherwise
 # the system will be stuck in a crystalline phase
-vfrac = random.uniform(0, 0.74)
+#vfrac = random.uniform(0, 0.74)
+vfrac = 0.2
 
 # Initialise patchy particle system
 p = patch(vfrac=vfrac)
