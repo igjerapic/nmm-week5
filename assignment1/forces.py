@@ -1,4 +1,3 @@
-import numpy as np
 import os 
 import glob
 
@@ -52,7 +51,7 @@ def main():
 
     # projection of forces on molecule a onto connection of COMs
     distances = np.einsum('ij,ij->i', vect_connect, vect_connect)
-    force_project = np.einsum('ij,ij->i', vect_connect, c60a_COM ) / distances
+    force_project = np.einsum('ij,ij->i', vect_connect, c60a_force ) / distances
     
     
     #TODO binning force on c60a over distances 
