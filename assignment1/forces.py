@@ -49,7 +49,7 @@ def main():
 
     vect_connect = c60a_COM - c60b_COM
 
-    # projection of forces on molecule a onto connection of COMs
+    # projection of forces on molecule a onto vectir connecting COMs
     distances = np.einsum('ij,ij->i', vect_connect, vect_connect)
     force_project = np.einsum('ij,ij->i', vect_connect, c60a_force ) / distances
     
