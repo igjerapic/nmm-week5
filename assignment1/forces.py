@@ -6,6 +6,8 @@ import MDAnalysis as mda
 import numpy as np
 import beadspring as bsa
 import matplotlib.pyplot as plt
+from scipy.integrate import trapezoid
+from scipy.optimize import curve_fit
 
 #def calculate_COM(atom_fragments):
 
@@ -46,38 +48,59 @@ def main():
 
     # projection of forces on molecule a onto vector connecting of COMs
     distances = np.linalg.norm(vect_connect, axis=1)
-    force_project = np.einsum('ij,ij->i', vect_connect, c60b_forces ) / distances
+    force_projection = np.einsum('ij,ij->i', c60a_forces, vect_connect ) / distances
 
 
-    stepsizes = [distances[i] - distances[i - 1] for i in range(1, len(distances))]
-    steps = np.arange(1, len(distances) + 1)
+    # Setting up bins
+    min_dist = min(distances)
+    max_dist = max(distances)
+    num_bins = 50
 
-    #TODO binning distances and then averageing force on c60a over distances 
-    bin_count_large = 20
-    bin_count_small = 10
-    center = len(distances)//2
+    bin_edges = np.linspace(min_dist, max_dist, num_bins)
+    bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
 
-    bin_edges_large = np.linspace(min(distances[:center]), max(distances[:center]),
-                                  bin_count_large)
-    bin_centers_large = 0.5 * (bin_edges_large[:-1] + bin_edges_large[1:])
-
-
-    bin_edges_small = np.linspace(min(distances[center - 5:]), max(distances[center - 5:]), 
-                                  bin_count_small)
-    bin_centers_small = 0.5 * (bin_edges_small[:-1] + bin_edges_small[1:])
-
-    bin_centers = np.concatenate((bin_centers_large, bin_centers_small))
-    bin_edges = np.concatenate((bin_edges_large, bin_edges_small))
-
-    # averaging
+    # averaging forces on molecule A
     avg_forces = np.zeros_like(bin_centers)
     for i in range(len(bin_centers)):
         mask = (distances >= bin_edges[i]) & (distances <= bin_edges[i + 1])
-        avg_forces[i] = np.average(force_project[mask])
-    #TODO fitting with either moors or LJ potential
+        avg_forces[i] = np.average(force_projection[mask])
+
+    # removing nan values
+    valid_indices = ~np.isnan(avg_forces)
+    avg_forces_valid = avg_forces[valid_indices]
+    bin_centers_valid= bin_centers[valid_indices]
 
 
-    #TODO in.fullerene_CG
+    # determining Potential Mean Field 
+    potential= np.zeros(len(bin_centers_valid))
+    for i in range(len(bin_centers_valid) - 1, 0, -1):
+        potential[i-1] = potential[i] + trapezoid(avg_forces_valid[i-1:i+1], 
+                                             x= bin_centers_valid[i-1:i+1] )
+
+    # fitting to LJ potential with offset
+    def lj(r, epsilon, sigma):
+        return 4 * epsilon * ( (sigma / r) ** 12 - (sigma / r) ** 6)
+
+    bounds = ((0,0), (np.inf, np.inf))
+    params, cov = curve_fit(lj, bin_centers_valid, potential,p0=(1,8), 
+                            bounds = bounds)
+    params_err = np.diag(cov)**0.5
+    
+    fit_vals = lj(bin_centers_valid, *params)
+
+
+    # Plotting results
+    plt.plot(bin_centers_valid, avg_forces_valid, "o:", color = "C1")
+    plt.xlabel(r"Distance ($\AA$)")
+    plt.ylabel("Force (eV / $\AA$)")
+    plt.show()
+    
+    plt.plot(bin_centers_valid, potential, "o", label = "PMF")
+    lj_label = f"LJ fit: $\epsilon$={params[0]:.2f}$\sigma={params[-1]:.2f} \pm$"
+    plt.plot(bin_centers_valid, fit_vals, color = 'k' , )
+    plt.xlabel(r"Distance ($\AA$)")
+    plt.ylabel("Energy (eV)")
+    plt.show()
 
 if __name__ == '__main__':
     main()
