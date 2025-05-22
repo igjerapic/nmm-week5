@@ -77,7 +77,7 @@ def main():
         potential[i-1] = potential[i] + trapezoid(avg_forces_valid[i-1:i+1], 
                                              x= bin_centers_valid[i-1:i+1] )
 
-    # fitting to LJ potential with offset
+    # fitting to LJ potential
     def lj(r, epsilon, sigma):
         return 4 * epsilon * ( (sigma / r) ** 12 - (sigma / r) ** 6)
 
