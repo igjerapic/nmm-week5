@@ -7,3 +7,5 @@ exclude-list
 *.png
 *.svg
 epsilon*
+rate*
+Nx*
