@@ -3,6 +3,7 @@ submit.sh
 out.lammps
 log.lammps
 exclude-list
-
+*.txt
+*.png
 *.svg
 epsilon*
