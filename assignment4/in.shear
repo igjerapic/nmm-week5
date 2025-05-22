@@ -7,7 +7,7 @@ dimension 3
 boundary p p p
 neighbor 0.8 bin
 
-read_restart       final.bin  # obtained at the end of melt creation
+read_restart       ../final.bin  # obtained at the end of melt creation
 change_box     all triclinic
 
 
@@ -19,11 +19,11 @@ neighbor	0.3 bin
 neigh_modify delay 0 every 20 check no
 variable	Tdamping equal 100*${dt_integration}
 
-variable	shearRate equal 1.0
+variable	shearRate equal ${ERATE}
 variable 	maxStrain equal 100
 
 
-variable	steps equal ${maxStrain}/(${shearRate}*${dt_integration})
+variable	steps equal round(${maxStrain}/(${shearRate}*${dt_integration}))
 variable	thermo_step equal ${steps}*0.001
 variable	bin_step equal ${steps}*0.1
 variable	dump_step equal ${steps}*0.01
