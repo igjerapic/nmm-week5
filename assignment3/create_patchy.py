@@ -15,10 +15,10 @@ Nx = total_particles / 2
 Ny = total_particles - Nx
 
 # Random patch counts per particle type
-# x = random.randint(3, 10)       # x equidistant patches
-# y = random.randint(3, 10)       # y equidistant patches
+# x = random.randint(2, 4)       # x equidistant patches
+# y = random.randint(2, 4)       # y equidistant patches
 x = 2
-y = 2
+y = 4
 
 
 
