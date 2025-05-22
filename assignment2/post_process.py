@@ -38,7 +38,7 @@ def main():
     box = bsa.setup_freud_box(u_lin.dimensions[0])
 
     # Computing RDF from final timesnap
-    rdf_bincenters, rdf, r_min, r_peak = bsa.compute_rdf(positions_lin[-1], box, r_max=6.0, bins=50)
+    rdf_bincenters, rdf, r_min, r_peak = bsa.compute_rdf(positions_lin[-1], box, r_max=5.0, bins=50)
 
     # Computing MSD
     msd = bsa.compute_msd(positions_log)
