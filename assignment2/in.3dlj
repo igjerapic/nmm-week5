@@ -6,9 +6,10 @@ atom_style 	    full
 boundary 	    p p p
 
 # Variables
-variable 	    N equal ???    # number of particles   # !!!!!!!!!!!!!!!!!!!!!!!!!!
-variable 	    eta equal ???   # packing fraction     # !!!!!!!!!!!!!!!!!!!!!!!!!!
+variable 	    N equal 2048    # number of particles   # !!!!!!!!!!!!!!!!!!!!!!!!!!
+variable 	    eta equal ${ETA}  # packing fraction     # !!!!!!!!!!!!!!!!!!!!!!!!!!
 variable 	    temp equal 1.0  # temperature
+variable        epsilon equal ${EPSILON}
 
 variable 	    sigma equal 1.0
 variable 	    particle_volume equal (4.0/3.0)*PI*(0.5*${sigma})^3  
@@ -23,7 +24,7 @@ create_atoms	    1 random ${N} ${rand_seed} box
 mass		    1 1.0
 
 pair_style	    lj/cut 2.5
-pair_coeff	    1 1 ??? 1.0 2.5                    # !!!!!!!!!!!!!!!!!!!!!!!!!
+pair_coeff	    1 1 ${epsilon} 1.0 2.5                    # !!!!!!!!!!!!!!!!!!!!!!!!!
 
 velocity	    all create ${temp} ${rand_seed}
 
