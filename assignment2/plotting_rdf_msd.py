@@ -82,14 +82,14 @@ def main():
     plt.ylabel(r"$g(r)$")
     plt.legend()
     plt.tight_layout()
-    #plt.savefig("RDF_eta0.4.svg", dpi=300)
+    plt.savefig("RDF_eta0.4.svg", dpi=300)
 
     plt.figure(2)
     plt.xlabel(r"Time $\tau$")
     plt.ylabel(r"MSD")
     plt.legend()
     plt.tight_layout()
-    #plt.savefig("MSD_eta0.4.svg", dpi=300)
+    plt.savefig("MSD_eta0.4.svg", dpi=300)
         
     plt.show()
 
