@@ -2,21 +2,6 @@ import re, yaml
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from cycler import cycler
-plt.style.use('../../scripts/default.mplstyle')
-
-plt.rcParams['axes.prop_cycle'] = plt.cycler(cycler(color = ['#332288', 
-                                    '#CC6677',
-                                    '#88CCEE',
-                                    '#DDCC77', 
-                                    '#117733', 
-                                    '#882255', 
-                                    '#44AA99', 
-                                    '#999933', 
-                                    '#AA4499',
-                                    '#DDDDDD'
-                                ]))
-
 def main():
     try:
         from yaml import CSafeLoader as Loader
