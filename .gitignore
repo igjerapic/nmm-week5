@@ -9,3 +9,10 @@ exclude-list
 epsilon*
 rate*
 Nx*
+
+# assignment 1
+assignment1/*data 
+assignment1/*.dat
+
+# assignment 2
+
