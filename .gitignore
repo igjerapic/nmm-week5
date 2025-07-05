@@ -2,6 +2,7 @@ lmp_data
 submit.sh
 out.lammps
 log.lammps
+*.lammps
 exclude-list
 *.txt
 *.png
@@ -13,6 +14,10 @@ Nx*
 # assignment 1
 assignment1/*data 
 assignment1/*.dat
+assignment1/with_bonds/
 
-# assignment 2
+# assignment 3
 
+
+
+# report
