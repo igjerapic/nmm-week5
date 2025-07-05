@@ -32,20 +32,18 @@ def main():
     
     Nxs = [0.25, 0.5]
     temps = [0.5, 2.0]
-    avg_sizes = np.zeros(( len(Nxs), len(temps))) # average sizes with shape (Nxs, temps)
-    filling = np.zeros_like(avg_sizes)
-    counter = 0
+    avg_sizes = np.zeros((2,2)) # average sizes with shape (Nxs, temps)
     for i, Nx in enumerate(Nxs):
         cluster_sizes = {}
         for j, T in enumerate(temps):
-            file= f"Nx{Nx}_T{T}/clusters.pkl"
-            data = pkl.load(open(file, 'rb'))
+            file= f"Nx{Nx}_T{T}_clusters.txt"
+            df = np.loadtxt(file, comments="#").T
 
-            sizes = data['sizes']
-            
-            # minimum size to contain two particles is 8 
-            mask = [size >= 8 for size in sizes]
-            avg_sizes[i,j] = np.mean(sizes[mask]) / max(sizes[mask])
+            cluster_sizes[f"{T}"] = df[1] # cluster sizes are stored in second column
+            N_ATOMS = sum(cluster_sizes[f"{T}"])
+
+            # determining weighted avg, where weight is size of cluster
+            avg_sizes[i,j] = np.sum(np.power(cluster_sizes[f"{T}"], 2)) / N_ATOMS
 
     # plotting
     barWidth = 0.2
@@ -56,13 +54,13 @@ def main():
 
     plt.bar(br1, avg_sizes[:,0], width = barWidth, label ='$T=$0.5') 
     plt.bar(br2, avg_sizes[:, 1], width=barWidth, label ='$T=$2.0')
-    plt.ylabel('Average Cluster Size') 
+    plt.ylabel('Weighted Average Cluster Size') 
     plt.xticks([r + 0.5 * barWidth for r in range(len(avg_sizes[0]))], 
-            [r'N$_2$0.25', r'N$_2$0.5'])
+            ['Nx0.25', 'Nx0.5'])
     plt.tight_layout()
     plt.legend()
     plt.savefig("avg_clusters.svg")
-    plt.show() 
+    #plt.show() 
 
 if __name__=="__main__":
     main()

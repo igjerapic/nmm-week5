@@ -32,36 +32,45 @@ def main():
     
     Nxs = [0.25, 0.5]
     temps = [0.5, 2.0]
-    avg_sizes = np.zeros(( len(Nxs), len(temps))) # average sizes with shape (Nxs, temps)
-    filling = np.zeros_like(avg_sizes)
-    counter = 0
+    avg_cs = np.zeros((len(Nxs), len(temps))) # average sizes with shape (Nxs, temps)
+    cs_dict = {}
     for i, Nx in enumerate(Nxs):
         cluster_sizes = {}
         for j, T in enumerate(temps):
             file= f"Nx{Nx}_T{T}/clusters.pkl"
-            data = pkl.load(open(file, 'rb'))
 
+
+            data = pkl.load(open(file, 'rb'))
+            cs = data['cs']
+            rgs = data['rgs']
             sizes = data['sizes']
             
-            # minimum size to contain two particles is 8 
-            mask = [size >= 8 for size in sizes]
-            avg_sizes[i,j] = np.mean(sizes[mask]) / max(sizes[mask])
+            mask = [size > 8 for size in sizes]
+            avg_cs[i,j] = np.mean(cs[mask] )
+            cs_dict[f"Nx{Nx}_T{T}"] = np.average(cs[mask] / rgs[mask]**2, weights = sizes[mask])
+
+
+    #         cluster_sizes[f"{T}"] = df[1] # cluster sizes are stored in second column
+    #         N_ATOMS = sum(cluster_sizes[f"{T}"])
+
+    #         # determining weighted avg, where weight is size of cluster
+    #         avg_sizes[i,j] = np.sum(np.power(cluster_sizes[f"{T}"], 2)) / N_ATOMS
 
     # plotting
     barWidth = 0.2
     fig = plt.subplots() 
     # Subbars for avg of temp 0.5
-    br1 = np.arange(len(avg_sizes[:, 0])) 
+    br1 = np.arange(len(avg_cs[:, 0])) 
     br2 = [x + barWidth for x in br1]
 
-    plt.bar(br1, avg_sizes[:,0], width = barWidth, label ='$T=$0.5') 
-    plt.bar(br2, avg_sizes[:, 1], width=barWidth, label ='$T=$2.0')
-    plt.ylabel('Average Cluster Size') 
-    plt.xticks([r + 0.5 * barWidth for r in range(len(avg_sizes[0]))], 
-            [r'N$_2$0.25', r'N$_2$0.5'])
+    plt.bar(br1, avg_cs[:,0], width = barWidth, label ='$T=$0.5') 
+    plt.bar(br2, avg_cs[:, 1], width=barWidth, label ='$T=$2.0')
+    plt.ylabel(r'$ \langle c \rangle =  \langle \lambda_1^2 - \lambda_2^2 \rangle $') 
+    plt.xticks([r + 0.5 * barWidth for r in range(len(avg_cs[0]))], 
+            ['$N_2$0.25', '$N_2$0.5'])
     plt.tight_layout()
     plt.legend()
-    plt.savefig("avg_clusters.svg")
+    plt.savefig("avg_cs.svg")
     plt.show() 
 
 if __name__=="__main__":
